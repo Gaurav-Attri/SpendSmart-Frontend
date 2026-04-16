@@ -1,0 +1,121 @@
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <h1>Budgets</h1>
+        <p>Set limits and track your spending goals</p>
+      </div>
+      <button class="btn btn-primary" (click)="openAdd()">+ New Budget</button>
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner" style="width:36px;height:36px;"></div></div>
+
+    <div class="budgets-grid" *ngIf="!loading">
+      <div *ngIf="budgets.length === 0" class="card" style="grid-column:1/-1;">
+        <div class="empty-state">
+          <div class="empty-icon">🎯</div>
+          <h3>No budgets yet</h3>
+          <p>Create a budget to start tracking your spending limits</p>
+        </div>
+      </div>
+
+      <div class="budget-card card" *ngFor="let b of budgets">
+        <div class="budget-card-header">
+          <div>
+            <div class="budget-card-name">{{ b.name }}</div>
+            <div class="budget-card-period">{{ b.period }} · {{ b.startDate | date:'MMM d' }} – {{ b.endDate | date:'MMM d, y' }}</div>
+          </div>
+          <div class="budget-card-actions">
+            <button class="btn btn-ghost btn-sm" (click)="openEdit(b)">✏️</button>
+            <button class="btn btn-ghost btn-sm" (click)="delete(b.budgetPlanId)">🗑️</button>
+          </div>
+        </div>
+
+        <div class="budget-amounts">
+          <div>
+            <div class="amount-label">Spent</div>
+            <div class="amount-value text-red">{{ b.currency }} {{ b.spentAmount | number:'1.0-0' }}</div>
+          </div>
+          <div class="budget-divider">/</div>
+          <div>
+            <div class="amount-label">Limit</div>
+            <div class="amount-value">{{ b.currency }} {{ b.limitAmount | number:'1.0-0' }}</div>
+          </div>
+          <div style="margin-left:auto;">
+            <div class="amount-label text-right">Remaining</div>
+            <div class="amount-value" [class.text-green]="b.remainingAmount >= 0" [class.text-red]="b.remainingAmount < 0">
+              {{ b.currency }} {{ b.remainingAmount | number:'1.0-0' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-bar" style="margin-top:0.75rem;">
+          <div class="progress-fill" [class]="'progress-fill ' + getUtilColor(b.utilizationPercentage)"
+            [style.width.%]="b.utilizationPercentage > 100 ? 100 : b.utilizationPercentage">
+          </div>
+        </div>
+        <div class="utilization-label">
+          <span [class.text-red]="b.utilizationPercentage >= 100">{{ b.utilizationPercentage | number:'1.1-1' }}% used</span>
+          <span class="badge" [class.badge-red]="b.utilizationPercentage >= 100"
+            [class.badge-yellow]="b.utilizationPercentage >= 80 && b.utilizationPercentage < 100"
+            [class.badge-green]="b.utilizationPercentage < 80">
+            {{ b.utilizationPercentage >= 100 ? 'Over Budget' : b.utilizationPercentage >= 80 ? 'Near Limit' : 'On Track' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ editId ? 'Edit Budget' : 'New Budget' }}</h2>
+          <button (click)="closeModal()">✕</button>
+        </div>
+        <div *ngIf="error" style="background:#fee2e2;color:#991b1b;padding:0.75rem;border-radius:8px;font-size:0.875rem;margin-bottom:1rem;">{{ error }}</div>
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="form-group">
+            <label>Budget Name *</label>
+            <input formControlName="name" type="text" class="form-control" placeholder="e.g. Monthly Groceries">
+          </div>
+          <div class="form-group">
+            <label>Category (optional)</label>
+            <select formControlName="categoryId" class="form-control">
+              <option [ngValue]="null">All categories</option>
+              <option *ngFor="let c of categories" [ngValue]="c.categoryItemId">{{ c.icon }} {{ c.name }}</option>
+            </select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="form-group">
+              <label>Limit Amount *</label>
+              <input formControlName="limitAmount" type="number" step="0.01" class="form-control" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Period *</label>
+              <select formControlName="period" class="form-control">
+                <option *ngFor="let p of periods" [value]="p">{{ p }}</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="form-group">
+              <label>Start Date *</label>
+              <input formControlName="startDate" type="date" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>End Date *</label>
+              <input formControlName="endDate" type="date" class="form-control">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" (click)="closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="submitting">
+              {{ editId ? 'Update' : 'Create Budget' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

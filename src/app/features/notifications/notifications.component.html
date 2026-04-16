@@ -1,0 +1,36 @@
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <h1>Notifications</h1>
+        <p>Stay updated on your budget alerts and activity</p>
+      </div>
+      <button *ngIf="unreadCount > 0" class="btn btn-outline" (click)="markAllRead()">
+        Mark all as read ({{ unreadCount }})
+      </button>
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner" style="width:36px;height:36px;"></div></div>
+
+    <div class="card" *ngIf="!loading">
+      <div *ngIf="notifications.length === 0" class="empty-state">
+        <div class="empty-icon">🔔</div>
+        <h3>No notifications</h3>
+        <p>You're all caught up!</p>
+      </div>
+      <div class="notif-list" *ngIf="notifications.length > 0">
+        <div class="notif-item" *ngFor="let n of notifications"
+          [class.unread]="!n.isRead" (click)="!n.isRead && markRead(n.notificationRecordId)">
+          <div class="notif-dot" *ngIf="!n.isRead"></div>
+          <div class="notif-body">
+            <div class="notif-title">{{ n.title }}</div>
+            <div class="notif-message">{{ n.message }}</div>
+            <div class="notif-time">{{ n.createdAt | date:'MMM d, y h:mm a' }}</div>
+          </div>
+          <button *ngIf="!n.isRead" class="btn btn-ghost btn-sm mark-btn">Mark read</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

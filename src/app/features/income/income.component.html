@@ -1,0 +1,123 @@
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <h1>Income</h1>
+        <p>Track all your income sources</p>
+      </div>
+      <button class="btn btn-accent" (click)="openAdd()">+ Add Income</button>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom:1.5rem;">
+      <div class="stat-card">
+        <div class="stat-icon green">💰</div>
+        <div class="stat-label">Total Income (All Time)</div>
+        <div class="stat-value">{{ currency }} {{ totalIncome | number:'1.0-0' }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">📋</div>
+        <div class="stat-label">Records</div>
+        <div class="stat-value">{{ records.length }}</div>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner" style="width:36px;height:36px;"></div></div>
+
+    <div class="card" *ngIf="!loading">
+      <div *ngIf="records.length === 0" class="empty-state">
+        <div class="empty-icon">💰</div>
+        <h3>No income records</h3>
+        <p>Add your first income record to start tracking</p>
+      </div>
+      <div class="table-wrapper" *ngIf="records.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Description</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Recurring</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of records">
+              <td><span class="badge badge-green">{{ r.source }}</span></td>
+              <td>{{ r.description || '—' }}</td>
+              <td class="text-green font-semibold">{{ r.currency }} {{ r.amount | number:'1.2-2' }}</td>
+              <td>{{ r.date | date:'MMM d, y' }}</td>
+              <td>
+                <span *ngIf="r.isRecurring" class="badge badge-blue">{{ r.recurrenceType || 'Yes' }}</span>
+                <span *ngIf="!r.isRecurring" class="badge badge-gray">No</span>
+              </td>
+              <td>
+                <div class="flex gap-2">
+                  <button class="btn btn-ghost btn-sm" (click)="openEdit(r)">✏️</button>
+                  <button class="btn btn-ghost btn-sm" (click)="delete(r.incomeRecordId)">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ editId ? 'Edit Income' : 'Add Income' }}</h2>
+          <button (click)="closeModal()">✕</button>
+        </div>
+        <div class="alert-error" *ngIf="error" style="background:#fee2e2;color:#991b1b;padding:0.75rem;border-radius:8px;font-size:0.875rem;margin-bottom:1rem;">{{ error }}</div>
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="form-group">
+              <label>Source *</label>
+              <select formControlName="source" class="form-control">
+                <option *ngFor="let s of sources" [value]="s">{{ s }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Amount *</label>
+              <input formControlName="amount" type="number" step="0.01" class="form-control" placeholder="0.00">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="form-group">
+              <label>Currency</label>
+              <input formControlName="currency" type="text" class="form-control" maxlength="3">
+            </div>
+            <div class="form-group">
+              <label>Date *</label>
+              <input formControlName="date" type="date" class="form-control">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input formControlName="description" type="text" class="form-control" placeholder="Optional note">
+          </div>
+          <div class="form-group" style="flex-direction:row;align-items:center;gap:0.5rem;">
+            <input formControlName="isRecurring" type="checkbox" id="rec" style="width:auto;">
+            <label for="rec" style="margin:0;cursor:pointer;">Recurring income</label>
+          </div>
+          <div class="form-group" *ngIf="f['isRecurring'].value">
+            <label>Recurrence Type</label>
+            <select formControlName="recurrenceType" class="form-control">
+              <option [ngValue]="null">Select...</option>
+              <option *ngFor="let t of recurrenceTypes" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" (click)="closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-accent" [disabled]="submitting">
+              {{ editId ? 'Update' : 'Add Income' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

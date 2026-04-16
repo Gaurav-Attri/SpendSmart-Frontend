@@ -1,0 +1,72 @@
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <div class="page-header">
+      <div><h1>Admin Panel</h1><p>Manage users and send notifications</p></div>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom:1.5rem;">
+      <div class="stat-card">
+        <div class="stat-icon blue">👥</div>
+        <div class="stat-label">Total Users</div>
+        <div class="stat-value">{{ users.length }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-label">Active Users</div>
+        <div class="stat-value">{{ activeCount }}</div>
+      </div>
+    </div>
+
+    <!-- Broadcast -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <h2 style="font-size:1rem;font-weight:600;margin-bottom:1rem;">📢 Send Broadcast Notification</h2>
+      <div *ngIf="broadcastSuccess" style="background:#dcfce7;color:#166534;padding:0.75rem;border-radius:8px;margin-bottom:1rem;font-size:0.875rem;">
+        ✅ {{ broadcastSuccess }}
+      </div>
+      <form [formGroup]="broadcastForm" (ngSubmit)="sendBroadcast()" style="display:flex;flex-direction:column;gap:0.75rem;">
+        <input formControlName="title" type="text" class="form-control" placeholder="Notification title" style="margin:0;">
+        <input formControlName="message" type="text" class="form-control" placeholder="Notification message" style="margin:0;">
+        <button type="submit" class="btn btn-primary" style="align-self:flex-start;" [disabled]="broadcasting">
+          {{ broadcasting ? 'Sending...' : 'Send to All Users' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card">
+      <div class="flex items-center justify-between" style="margin-bottom:1rem;">
+        <h2 style="font-size:1rem;font-weight:600;">All Users</h2>
+        <input [(ngModel)]="filter" type="text" class="form-control" style="width:240px;margin:0;" placeholder="🔍 Search users...">
+      </div>
+
+      <div *ngIf="loading" class="loading-center"><div class="spinner" style="width:36px;height:36px;"></div></div>
+
+      <div class="table-wrapper" *ngIf="!loading">
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Role</th><th>Currency</th><th>Joined</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of filteredUsers">
+              <td class="font-semibold">{{ u.fullName }}</td>
+              <td>{{ u.email }}</td>
+              <td><span class="badge" [class.badge-purple]="u.role==='Admin'" [class.badge-blue]="u.role!=='Admin'">{{ u.role }}</span></td>
+              <td>{{ u.currency }}</td>
+              <td>{{ u.createdAt | date:'MMM d, y' }}</td>
+              <td><span class="badge" [class.badge-green]="u.isActive" [class.badge-red]="!u.isActive">
+                {{ u.isActive ? 'Active' : 'Inactive' }}
+              </span></td>
+              <td>
+                <button *ngIf="u.isActive && u.role !== 'Admin'" class="btn btn-danger btn-sm" (click)="deactivate(u.userId)">
+                  Deactivate
+                </button>
+                <span *ngIf="!u.isActive || u.role === 'Admin'" class="text-muted text-sm">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

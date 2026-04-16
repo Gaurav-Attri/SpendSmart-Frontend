@@ -1,0 +1,62 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed">
+  <div class="sidebar-header">
+    <div class="brand" *ngIf="!isCollapsed">
+      <span class="brand-icon">💡</span>
+      <span class="brand-name">SpendSmart</span>
+    </div>
+    <button class="collapse-btn" (click)="toggleCollapse()">
+      {{ isCollapsed ? '→' : '←' }}
+    </button>
+  </div>
+
+  <nav class="sidebar-nav">
+
+    <!-- NAV ITEMS -->
+    <a
+      *ngFor="let item of navItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      class="nav-item"
+      [class.collapsed]="isCollapsed"
+    >
+      <span class="nav-icon">{{ item.icon }}</span>
+      <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+      <span
+        class="nav-badge"
+        *ngIf="item.route === '/notifications' && unreadCount > 0 && !isCollapsed"
+      >
+        {{ unreadCount }}
+      </span>
+    </a>
+
+    <!-- ADMIN -->
+    <a
+      *ngIf="auth.isAdmin"
+      routerLink="/admin"
+      routerLinkActive="active"
+      class="nav-item"
+      [class.collapsed]="isCollapsed"
+    >
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label" *ngIf="!isCollapsed">Admin</span>
+    </a>
+
+  </nav>
+
+  <div class="sidebar-footer">
+    <a routerLink="/profile" class="user-info" [class.collapsed]="isCollapsed">
+      <div class="avatar">
+        {{ user?.fullName?.charAt(0)?.toUpperCase() }}
+      </div>
+      <div class="user-details" *ngIf="!isCollapsed">
+        <div class="user-name">{{ user?.fullName }}</div>
+        <div class="user-role">{{ user?.role }}</div>
+      </div>
+    </a>
+
+    <button class="logout-btn" (click)="logout()" title="Logout">
+      <span>🚪</span>
+      <span *ngIf="!isCollapsed">Logout</span>
+    </button>
+  </div>
+</aside>

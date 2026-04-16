@@ -1,0 +1,98 @@
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <div class="page-header">
+      <div><h1>Profile Settings</h1><p>Manage your account information</p></div>
+    </div>
+
+    <div *ngIf="successMsg" style="background:#dcfce7;color:#166534;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1.25rem;font-size:0.875rem;">
+      ✅ {{ successMsg }}
+    </div>
+    <div *ngIf="errorMsg" style="background:#fee2e2;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1.25rem;font-size:0.875rem;">
+      ❌ {{ errorMsg }}
+    </div>
+
+    <div class="profile-grid">
+      <!-- Profile Info -->
+      <div class="card">
+        <div class="profile-avatar-row">
+          <div class="profile-avatar">{{ user.fullName?.charAt(0)?.toUpperCase() }}</div>
+          <div>
+            <div class="profile-name">{{ user.fullName }}</div>
+            <div class="profile-email">{{ user.email }}</div>
+            <span class="badge" [class.badge-purple]="user.role==='Admin'" [class.badge-blue]="user.role!=='Admin'">{{ user.role }}</span>
+          </div>
+        </div>
+        <hr style="border:none;border-top:1px solid var(--border);margin:1.25rem 0;">
+        <h3 class="section-label">Personal Information</h3>
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input formControlName="fullName" type="text" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Avatar URL (optional)</label>
+            <input formControlName="avatarUrl" type="text" class="form-control" placeholder="https://...">
+          </div>
+          <button type="submit" class="btn btn-primary" [disabled]="saving">
+            {{ saving ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </form>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:1.25rem;">
+        <!-- Currency -->
+        <div class="card">
+          <h3 class="section-label">Currency Preference</h3>
+          <form [formGroup]="currencyForm" (ngSubmit)="saveCurrency()">
+            <div class="form-group">
+              <label>Default Currency</label>
+              <select formControlName="currency" class="form-control">
+                <option *ngFor="let c of currencies" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-outline" [disabled]="savingCurrency">
+              {{ savingCurrency ? 'Saving...' : 'Update Currency' }}
+            </button>
+          </form>
+        </div>
+
+        <!-- Change Password -->
+        <div class="card" *ngIf="!user.isGoogleUser">
+          <h3 class="section-label">Change Password</h3>
+          <form [formGroup]="passwordForm" (ngSubmit)="savePassword()">
+            <div class="form-group">
+              <label>Current Password</label>
+              <input formControlName="currentPassword" type="password" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input formControlName="newPassword" [type]="showPassword ? 'text' : 'password'" class="form-control"
+                placeholder="Min 8 chars, upper, lower, number, special">
+              <button type="button" style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:var(--primary);margin-top:0.25rem;padding:0;"
+                (click)="showPassword=!showPassword">{{ showPassword ? 'Hide' : 'Show' }} password</button>
+            </div>
+            <button type="submit" class="btn btn-outline" [disabled]="savingPwd">
+              {{ savingPwd ? 'Changing...' : 'Change Password' }}
+            </button>
+          </form>
+        </div>
+
+        <!-- Account Info -->
+        <div class="card">
+          <h3 class="section-label">Account Details</h3>
+          <div class="info-row"><span>Member since</span><span>{{ user.createdAt | date:'MMM d, y' }}</span></div>
+          <div class="info-row"><span>Account type</span><span>{{ user.isGoogleUser ? '🔐 Google' : '📧 Email' }}</span></div>
+          <div class="info-row"><span>Status</span>
+            <span class="badge" [class.badge-green]="user.isActive" [class.badge-red]="!user.isActive">
+              {{ user.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+          <button class="btn btn-danger" style="margin-top:1rem;width:100%;" (click)="auth.logout()">
+            🚪 Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

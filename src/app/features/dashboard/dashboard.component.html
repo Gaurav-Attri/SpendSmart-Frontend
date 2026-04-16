@@ -1,0 +1,111 @@
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p>Here's your financial overview for this month</p>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner" style="width:36px;height:36px;"></div></div>
+
+    <ng-container *ngIf="!loading">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon green">💰</div>
+          <div class="stat-label">Total Income</div>
+          <div class="stat-value">{{ currency }} {{ totalIncome | number:'1.0-0' }}</div>
+          <div class="stat-sub">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">💸</div>
+          <div class="stat-label">Monthly Expenses</div>
+          <div class="stat-value">{{ currency }} {{ totalExpenses | number:'1.0-0' }}</div>
+          <div class="stat-sub">This month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">📊</div>
+          <div class="stat-label">Net Savings</div>
+          <div class="stat-value" [class.text-green]="netSavings >= 0" [class.text-red]="netSavings < 0">
+            {{ currency }} {{ netSavings | number:'1.0-0' }}
+          </div>
+          <div class="stat-sub">This month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">🎯</div>
+          <div class="stat-label">Savings Rate</div>
+          <div class="stat-value">{{ savingsRate | number:'1.1-1' }}%</div>
+          <div class="stat-sub">This month</div>
+        </div>
+      </div>
+
+      <!-- Budget Alerts -->
+      <div class="alert-banner" *ngIf="overBudget.length > 0">
+        <span>⚠️</span>
+        <strong>{{ overBudget.length }} budget{{ overBudget.length > 1 ? 's' : '' }} exceeded!</strong>
+        <span>{{ overBudget.map(b => b.name).join(', ') }}</span>
+        <a routerLink="/budgets" class="btn btn-sm btn-outline" style="margin-left:auto;">View Budgets</a>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Recent Expenses -->
+        <div class="card">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="section-title">Recent Expenses</h2>
+            <a routerLink="/expenses" class="btn btn-ghost btn-sm">View all →</a>
+          </div>
+          <div *ngIf="recentExpenses.length === 0" class="empty-state" style="padding:2rem;">
+            <div class="empty-icon">💸</div>
+            <p>No expenses yet</p>
+          </div>
+          <div class="expense-list" *ngIf="recentExpenses.length > 0">
+            <div class="expense-row" *ngFor="let e of recentExpenses">
+              <div class="expense-info">
+                <div class="expense-desc">{{ e.description || 'Expense' }}</div>
+                <div class="expense-date">{{ e.date | date:'MMM d, y' }} · {{ e.paymentMode }}</div>
+              </div>
+              <div class="expense-amount">
+                <span class="text-red">-{{ e.currency }} {{ e.amount | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Budget Overview -->
+        <div class="card">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="section-title">Budget Overview</h2>
+            <a routerLink="/budgets" class="btn btn-ghost btn-sm">Manage →</a>
+          </div>
+          <div *ngIf="budgets.length === 0" class="empty-state" style="padding:2rem;">
+            <div class="empty-icon">🎯</div>
+            <p>No budgets set up</p>
+          </div>
+          <div class="budget-list" *ngIf="budgets.length > 0">
+            <div class="budget-row" *ngFor="let b of budgets">
+              <div class="flex justify-between mb-2">
+                <span class="budget-name">{{ b.name }}</span>
+                <span class="budget-pct" [class.text-red]="b.utilizationPercentage >= 100"
+                  [class.text-primary-color]="b.utilizationPercentage < 100">
+                  {{ b.utilizationPercentage | number:'1.0-0' }}%
+                </span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"
+                  [class]="'progress-fill ' + getUtilColor(b.utilizationPercentage)"
+                  [style.width.%]="b.utilizationPercentage > 100 ? 100 : b.utilizationPercentage">
+                </div>
+              </div>
+              <div class="flex justify-between mt-1 text-xs text-muted">
+                <span>{{ b.currency }} {{ b.spentAmount | number:'1.0-0' }} spent</span>
+                <span>Limit: {{ b.currency }} {{ b.limitAmount | number:'1.0-0' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

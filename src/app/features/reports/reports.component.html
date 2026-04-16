@@ -1,0 +1,99 @@
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <h1>Reports</h1>
+        <p>Analyze your financial trends and generate PDF reports</p>
+      </div>
+    </div>
+
+    <!-- Month/Year Selector -->
+    <div class="card filter-row">
+      <select [(ngModel)]="selectedMonth" class="form-control" style="width:160px;">
+        <option *ngFor="let m of months" [value]="m.value">{{ m.label }}</option>
+      </select>
+      <select [(ngModel)]="selectedYear" class="form-control" style="width:100px;">
+        <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+      </select>
+      <button class="btn btn-primary" (click)="loadSummary()">View</button>
+      <button class="btn btn-outline" [disabled]="generating" (click)="generatePdf()">
+        <span *ngIf="generating" class="spinner" style="width:16px;height:16px;"></span>
+        {{ generating ? 'Generating...' : '📄 Export PDF' }}
+      </button>
+      <span *ngIf="genSuccess" class="text-green text-sm">{{ genSuccess }}</span>
+    </div>
+
+    <!-- Monthly Summary -->
+    <div *ngIf="loading" class="loading-center"><div class="spinner" style="width:36px;height:36px;"></div></div>
+
+    <ng-container *ngIf="!loading && summary">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon green">💰</div>
+          <div class="stat-label">Total Income</div>
+          <div class="stat-value text-green">{{ currency }} {{ summary.totalIncome | number:'1.0-0' }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">💸</div>
+          <div class="stat-label">Total Expenses</div>
+          <div class="stat-value text-red">{{ currency }} {{ summary.totalExpenses | number:'1.0-0' }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">📊</div>
+          <div class="stat-label">Net Savings</div>
+          <div class="stat-value" [class.text-green]="summary.netSavings >= 0" [class.text-red]="summary.netSavings < 0">
+            {{ currency }} {{ summary.netSavings | number:'1.0-0' }}
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">🎯</div>
+          <div class="stat-label">Savings Rate</div>
+          <div class="stat-value">{{ summary.savingsRate | number:'1.1-1' }}%</div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Trend Chart (text-based) -->
+    <div class="card" *ngIf="trendData.length > 0" style="margin-bottom:1.25rem;">
+      <h2 style="font-size:1rem;font-weight:600;margin-bottom:1rem;">6-Month Expense Trend</h2>
+      <div class="trend-chart">
+        <div class="trend-bar-wrap" *ngFor="let t of trendData">
+          <div class="trend-bar-container">
+            <div class="trend-bar" [style.height.%]="getBarHeight(t.expense)"></div>
+          </div>
+          <div class="trend-label">{{ t.label }}</div>
+          <div class="trend-value">{{ currency }} {{ t.expense | number:'1.0-0' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Past Reports -->
+    <div class="card">
+      <h2 style="font-size:1rem;font-weight:600;margin-bottom:1rem;">Generated Reports</h2>
+      <div *ngIf="reports.length === 0" class="empty-state" style="padding:2rem;">
+        <div class="empty-icon">📄</div>
+        <p>No reports generated yet</p>
+      </div>
+      <div class="table-wrapper" *ngIf="reports.length > 0">
+        <table>
+          <thead>
+            <tr><th>Title</th><th>Type</th><th>Generated</th><th>Status</th><th>Download</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of reports">
+              <td>{{ r.title }}</td>
+              <td><span class="badge badge-blue">{{ r.reportType }}</span></td>
+              <td>{{ r.generatedAt | date:'MMM d, y h:mm a' }}</td>
+              <td><span class="badge" [class.badge-green]="r.status==='COMPLETED'" [class.badge-yellow]="r.status!=='COMPLETED'">{{ r.status }}</span></td>
+              <td>
+                <a *ngIf="r.filePath" [href]="r.filePath" target="_blank" class="btn btn-ghost btn-sm">📥 Download</a>
+                <span *ngIf="!r.filePath" class="text-muted">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

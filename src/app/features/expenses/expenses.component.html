@@ -1,0 +1,132 @@
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <h1>Expenses</h1>
+        <p>Track and manage your spending</p>
+      </div>
+      <button class="btn btn-primary" (click)="openAdd()">+ Add Expense</button>
+    </div>
+
+    <!-- Search -->
+    <div class="card" style="padding:1rem; margin-bottom:1.25rem;">
+      <input [(ngModel)]="searchQ" (input)="search()" type="text"
+        class="form-control" placeholder="🔍 Search by description or tags..." style="margin:0;">
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner" style="width:36px;height:36px;"></div></div>
+
+    <div class="card" *ngIf="!loading">
+      <div *ngIf="filtered.length === 0" class="empty-state">
+        <div class="empty-icon">💸</div>
+        <h3>No expenses found</h3>
+        <p>Add your first expense to start tracking your spending</p>
+      </div>
+
+      <div class="table-wrapper" *ngIf="filtered.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Payment</th>
+              <th>Recurring</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of filtered">
+              <td>
+                <span class="cat-chip">
+                  {{ getCategoryIcon(e.categoryId) }} {{ getCategoryName(e.categoryId) }}
+                </span>
+              </td>
+              <td>{{ e.description || '—' }}</td>
+              <td class="text-red font-semibold">{{ e.currency }} {{ e.amount | number:'1.2-2' }}</td>
+              <td>{{ e.date | date:'MMM d, y' }}</td>
+              <td><span class="badge badge-blue">{{ e.paymentMode }}</span></td>
+              <td><span class="badge" [class.badge-green]="e.isRecurring" [class.badge-gray]="!e.isRecurring">
+                {{ e.isRecurring ? 'Yes' : 'No' }}
+              </span></td>
+              <td>
+                <div class="flex gap-2">
+                  <button class="btn btn-ghost btn-sm" (click)="openEdit(e)">✏️</button>
+                  <button class="btn btn-ghost btn-sm" (click)="delete(e.expenseEntryId)">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ editId ? 'Edit Expense' : 'Add Expense' }}</h2>
+          <button (click)="closeModal()">✕</button>
+        </div>
+
+        <div class="alert alert-error" *ngIf="error" style="margin-bottom:1rem;padding:0.75rem 1rem;background:#fee2e2;color:#991b1b;border-radius:8px;font-size:0.875rem;">{{ error }}</div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="form-group">
+            <label>Category *</label>
+            <select formControlName="categoryId" class="form-control" [class.error]="f['categoryId'].invalid && f['categoryId'].touched">
+              <option [ngValue]="null" disabled>Select category</option>
+              <option *ngFor="let c of categories" [ngValue]="c.categoryItemId">
+                {{ c.icon }} {{ c.name }}
+              </option>
+            </select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="form-group">
+              <label>Amount *</label>
+              <input formControlName="amount" type="number" step="0.01" class="form-control"
+                [class.error]="f['amount'].invalid && f['amount'].touched" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Currency</label>
+              <input formControlName="currency" type="text" class="form-control" maxlength="3">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input formControlName="description" type="text" class="form-control" placeholder="What was this for?">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="form-group">
+              <label>Date *</label>
+              <input formControlName="date" type="date" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Payment Mode *</label>
+              <select formControlName="paymentMode" class="form-control">
+                <option *ngFor="let p of paymentModes" [value]="p">{{ p }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Tags (comma separated)</label>
+            <input formControlName="tags" type="text" class="form-control" placeholder="food, travel...">
+          </div>
+          <div class="form-group" style="flex-direction:row;align-items:center;gap:0.5rem;margin-bottom:0;">
+            <input formControlName="isRecurring" type="checkbox" id="recurring" style="width:auto;">
+            <label for="recurring" style="margin:0;cursor:pointer;">Recurring expense</label>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" (click)="closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="submitting">
+              <span *ngIf="submitting" class="spinner" style="width:16px;height:16px;"></span>
+              {{ editId ? 'Update' : 'Add Expense' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

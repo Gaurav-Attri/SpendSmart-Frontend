@@ -1,0 +1,92 @@
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <h1>Categories</h1>
+        <p>Organize your transactions with custom categories</p>
+      </div>
+      <button class="btn btn-primary" (click)="showModal=true; error=''; initForm()">+ New Category</button>
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner" style="width:36px;height:36px;"></div></div>
+
+    <ng-container *ngIf="!loading">
+      <h2 class="section-heading">Expense Categories</h2>
+      <div class="categories-grid">
+        <div *ngIf="expenseCategories.length === 0" class="empty-card card">No expense categories yet</div>
+        <div class="category-card card" *ngFor="let c of expenseCategories">
+          <div class="cat-icon" [style.background]="c.color + '22'" [style.color]="c.color">{{ c.icon }}</div>
+          <div class="cat-info">
+            <div class="cat-name">{{ c.name }}</div>
+            <div class="cat-meta">
+              <span class="badge badge-blue">{{ c.type }}</span>
+              <span class="badge badge-green" *ngIf="c.isDefault">Default</span>
+              <span class="badge badge-gray" *ngIf="!c.isActive">Inactive</span>
+            </div>
+          </div>
+          <button *ngIf="c.isActive && !c.isDefault" class="btn btn-ghost btn-sm" (click)="deactivate(c.categoryItemId)" title="Deactivate">✕</button>
+        </div>
+      </div>
+
+      <h2 class="section-heading" style="margin-top:2rem;">Income Categories</h2>
+      <div class="categories-grid">
+        <div *ngIf="incomeCategories.length === 0" class="empty-card card">No income categories yet</div>
+        <div class="category-card card" *ngFor="let c of incomeCategories">
+          <div class="cat-icon" [style.background]="c.color + '22'" [style.color]="c.color">{{ c.icon }}</div>
+          <div class="cat-info">
+            <div class="cat-name">{{ c.name }}</div>
+            <div class="cat-meta">
+              <span class="badge badge-green">{{ c.type }}</span>
+              <span class="badge badge-blue" *ngIf="c.isDefault">Default</span>
+            </div>
+          </div>
+          <button *ngIf="c.isActive && !c.isDefault" class="btn btn-ghost btn-sm" (click)="deactivate(c.categoryItemId)">✕</button>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Modal -->
+    <div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>New Category</h2>
+          <button (click)="showModal=false">✕</button>
+        </div>
+        <div *ngIf="error" style="background:#fee2e2;color:#991b1b;padding:0.75rem;border-radius:8px;font-size:0.875rem;margin-bottom:1rem;">{{ error }}</div>
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="form-group">
+            <label>Name *</label>
+            <input formControlName="name" type="text" class="form-control" placeholder="Category name">
+          </div>
+          <div class="form-group">
+            <label>Type *</label>
+            <select formControlName="type" class="form-control">
+              <option *ngFor="let t of types" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Icon</label>
+            <div class="icon-grid">
+              <button type="button" *ngFor="let i of icons" class="icon-btn"
+                [class.selected]="f['icon'].value === i"
+                (click)="form.patchValue({icon: i})">{{ i }}</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Color</label>
+            <div class="color-grid">
+              <button type="button" *ngFor="let c of colors" class="color-btn"
+                [style.background]="c" [class.selected]="f['color'].value === c"
+                (click)="form.patchValue({color: c})"></button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" (click)="showModal=false">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="submitting">Create</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

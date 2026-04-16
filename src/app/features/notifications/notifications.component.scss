@@ -1,0 +1,32 @@
+.notif-list { display: flex; flex-direction: column; }
+
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  cursor: default;
+  transition: background 0.15s;
+  position: relative;
+
+  &:last-child { border-bottom: none; }
+  &.unread { background: rgba(99,102,241,0.03); cursor: pointer; &:hover { background: rgba(99,102,241,0.06); } }
+}
+
+.notif-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+  margin-top: 0.375rem;
+}
+
+.notif-body {
+  flex: 1;
+  .notif-title { font-size: 0.9375rem; font-weight: 600; color: var(--text-primary); }
+  .notif-message { font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.25rem; }
+  .notif-time { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.375rem; }
+}
+
+.mark-btn { margin-left: auto; flex-shrink: 0; }
