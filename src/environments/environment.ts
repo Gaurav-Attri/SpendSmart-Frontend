@@ -1,12 +1,12 @@
 export const environment = {
   production: false,
   apis: {
-    auth:         'http://localhost:5001',
-    expense:      'http://localhost:5002',
-    income:       'http://localhost:5003',
-    category:     'http://localhost:5004',
-    budget:       'http://localhost:5005',
-    report:       'http://localhost:5006',
-    notification: 'http://localhost:5007',
+    auth:         'https://smartspend-auth.bravebush-7e41c0c6.centralindia.azurecontainerapps.io',
+    expense:      'https://smartspend-expense.bravebush-7e41c0c6.centralindia.azurecontainerapps.io',
+    income:       'https://smartspend-income.bravebush-7e41c0c6.centralindia.azurecontainerapps.io',
+    category:     'https://smartspend-category.bravebush-7e41c0c6.centralindia.azurecontainerapps.io',
+    budget:       'https://smartspend-budget.bravebush-7e41c0c6.centralindia.azurecontainerapps.io',
+    report:       'https://smartspend-report.bravebush-7e41c0c6.centralindia.azurecontainerapps.io',
+    notification: 'https://smartspend-notification.bravebush-7e41c0c6.centralindia.azurecontainerapps.io',
   }
 };
