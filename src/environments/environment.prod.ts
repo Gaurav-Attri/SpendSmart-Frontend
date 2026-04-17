@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   apis: {
     auth:         'https://smartspend-auth.bravebush-7e41c0c6.centralindia.azurecontainerapps.io',
     expense:      'https://smartspend-expense.bravebush-7e41c0c6.centralindia.azurecontainerapps.io',
