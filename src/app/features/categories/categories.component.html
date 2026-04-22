@@ -26,6 +26,7 @@
             </div>
           </div>
           <button *ngIf="c.isActive && !c.isDefault" class="btn btn-ghost btn-sm" (click)="deactivate(c.categoryItemId)" title="Deactivate">✕</button>
+          <button *ngIf="!c.isActive && !c.isDefault" class="btn btn-outline btn-sm" (click)="restore(c)" title="Restore">Restore</button>
         </div>
       </div>
 
@@ -39,14 +40,15 @@
             <div class="cat-meta">
               <span class="badge badge-green">{{ c.type }}</span>
               <span class="badge badge-blue" *ngIf="c.isDefault">Default</span>
+              <span class="badge badge-gray" *ngIf="!c.isActive">Inactive</span>
             </div>
           </div>
           <button *ngIf="c.isActive && !c.isDefault" class="btn btn-ghost btn-sm" (click)="deactivate(c.categoryItemId)">✕</button>
+          <button *ngIf="!c.isActive && !c.isDefault" class="btn btn-outline btn-sm" (click)="restore(c)">Restore</button>
         </div>
       </div>
     </ng-container>
 
-    <!-- Modal -->
     <div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">

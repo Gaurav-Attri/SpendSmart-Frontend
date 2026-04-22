@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { IncomeRecord, CreateIncomeDto, UpdateIncomeDto } from '../models/income.model';
 
@@ -9,8 +9,8 @@ export class IncomeService {
   private readonly base = `${environment.apis.income}/api/incomes`;
   constructor(private http: HttpClient) {}
 
-  create(dto: CreateIncomeDto): Observable<IncomeRecord> {
-    return this.http.post<IncomeRecord>(this.base, dto);
+  create(dto: CreateIncomeDto): Observable<void> {
+    return this.http.post(this.base, dto, { responseType: 'text' }).pipe(map(() => void 0));
   }
 
   getById(id: number): Observable<IncomeRecord> {
@@ -39,10 +39,10 @@ export class IncomeService {
   }
 
   update(id: number, dto: UpdateIncomeDto): Observable<void> {
-    return this.http.put<void>(`${this.base}/${id}`, dto);
+    return this.http.put(`${this.base}/${id}`, dto, { responseType: 'text' }).pipe(map(() => void 0));
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${id}`);
+    return this.http.delete(`${this.base}/${id}`, { responseType: 'text' }).pipe(map(() => void 0));
   }
 }

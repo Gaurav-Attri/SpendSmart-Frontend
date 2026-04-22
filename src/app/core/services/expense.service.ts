@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ExpenseEntry, CreateExpenseDto, UpdateExpenseDto } from '../models/expense.model';
 
@@ -9,8 +9,8 @@ export class ExpenseService {
   private readonly base = `${environment.apis.expense}/api/expenses`;
   constructor(private http: HttpClient) {}
 
-  create(dto: CreateExpenseDto): Observable<ExpenseEntry> {
-    return this.http.post<ExpenseEntry>(this.base, dto);
+  create(dto: CreateExpenseDto): Observable<void> {
+    return this.http.post(this.base, dto, { responseType: 'text' }).pipe(map(() => void 0));
   }
 
   getById(id: number): Observable<ExpenseEntry> {
@@ -49,10 +49,10 @@ export class ExpenseService {
   }
 
   update(id: number, dto: UpdateExpenseDto): Observable<void> {
-    return this.http.put<void>(`${this.base}/${id}`, dto);
+    return this.http.put(`${this.base}/${id}`, dto, { responseType: 'text' }).pipe(map(() => void 0));
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${id}`);
+    return this.http.delete(`${this.base}/${id}`, { responseType: 'text' }).pipe(map(() => void 0));
   }
 }

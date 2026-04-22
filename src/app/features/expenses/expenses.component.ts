@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { ExpenseService } from '../../core/services/expense.service';
 import { CategoryService } from '../../core/services/category.service';
@@ -34,6 +35,7 @@ export class ExpensesComponent implements OnInit {
     private auth: AuthService,
     private expenseService: ExpenseService,
     private categoryService: CategoryService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -59,6 +61,7 @@ export class ExpensesComponent implements OnInit {
   loadData(): void {
     this.categoryService.getAllForUser(this.userId).subscribe((cats) => {
       this.categories = cats.filter((c) => c.isActive && c.type === 'EXPENSE');
+      this.cdr.detectChanges();
     });
     this.expenseService.getByUser(this.userId).subscribe({
       next: (data) => {
@@ -67,9 +70,11 @@ export class ExpensesComponent implements OnInit {
         );
         this.filtered = [...this.expenses];
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -99,6 +104,8 @@ export class ExpensesComponent implements OnInit {
 
   closeModal(): void {
     this.showModal = false;
+    this.submitting = false;
+    this.cdr.detectChanges();
   }
 
   submit(): void {
@@ -113,36 +120,41 @@ export class ExpensesComponent implements OnInit {
       userId: this.userId,
       date: new Date(this.form.value.date).toISOString(),
     };
-    if (this.editId) {
-      this.expenseService.update(this.editId, val).subscribe({
+    const request$ = this.editId
+      ? this.expenseService.update(this.editId, val)
+      : this.expenseService.create(val);
+
+    request$
+      .pipe(
+        finalize(() => {
+          this.submitting = false;
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
         next: () => {
           this.closeModal();
           this.loadData();
-          this.submitting = false;
         },
         error: (err: any) => {
-          this.error = err.error?.error || 'An error occurred';
-          this.submitting = false;
+          this.error = this.getErrorMessage(err);
         },
       });
-    } else {
-      this.expenseService.create(val).subscribe({
-        next: () => {
-          this.closeModal();
-          this.loadData();
-          this.submitting = false;
-        },
-        error: (err: any) => {
-          this.error = err.error?.error || 'An error occurred';
-          this.submitting = false;
-        },
-      });
-    }
   }
 
   delete(id: number): void {
     if (!confirm('Delete this expense?')) return;
-    this.expenseService.delete(id).subscribe(() => this.loadData());
+    this.expenseService.delete(id).subscribe({
+      next: () => {
+        this.expenses = this.expenses.filter((expense) => expense.expenseEntryId !== id);
+        this.search();
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.error = this.getErrorMessage(err);
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   search(): void {
@@ -160,6 +172,14 @@ export class ExpensesComponent implements OnInit {
 
   getCategoryIcon(id: number): string {
     return this.categories.find((c) => c.categoryItemId === id)?.icon || '📁';
+  }
+
+  private getErrorMessage(err: any): string {
+    const apiError = err?.error;
+    if (typeof apiError === 'string' && apiError.trim()) {
+      return apiError;
+    }
+    return apiError?.error || apiError?.detail || apiError?.title || 'An error occurred';
   }
 
   get f() {

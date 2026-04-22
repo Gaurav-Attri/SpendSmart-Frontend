@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CategoryItem, CreateCategoryDto } from '../models/category.model';
 
@@ -21,11 +21,11 @@ export class CategoryService {
     return this.http.get<CategoryItem>(`${this.base}/${id}`);
   }
 
-  create(dto: CreateCategoryDto): Observable<CategoryItem> {
-    return this.http.post<CategoryItem>(this.base, dto);
+  create(dto: CreateCategoryDto): Observable<void> {
+    return this.http.post(this.base, dto, { responseType: 'text' }).pipe(map(() => void 0));
   }
 
   deactivate(id: number): Observable<void> {
-    return this.http.put<void>(`${this.base}/${id}/deactivate`, {});
+    return this.http.put(`${this.base}/${id}/deactivate`, {}, { responseType: 'text' }).pipe(map(() => void 0));
   }
 }
