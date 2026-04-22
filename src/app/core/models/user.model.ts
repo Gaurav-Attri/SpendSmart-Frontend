@@ -16,6 +16,10 @@ export interface AuthResponse {
   refreshToken: string;
 }
 
+export interface GoogleAuthUrlResponse {
+  url: string;
+}
+
 export interface LoginDto {
   email: string;
   password: string;
@@ -29,11 +33,16 @@ export interface RegisterDto {
 }
 
 export interface ChangePasswordDto {
-  currentPassword: string;
+  oldPassword: string;
   newPassword: string;
 }
 
 export interface UpdateProfileDto {
   fullName: string;
   avatarUrl?: string;
+}
+
+export interface GoogleLoginDto {
+  idToken: string;
+  accessToken?: string | null;
 }

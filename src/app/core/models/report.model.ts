@@ -1,10 +1,21 @@
 export interface MonthlySummary {
-  month: number;
-  year: number;
   totalIncome: number;
   totalExpenses: number;
   netSavings: number;
   savingsRate: number;
+  topCategory?: string | null;
+  categoryBreakdown?: Record<string, number> | null;
+}
+
+export interface MonthlySummaryResponse {
+  totalIncome?: number;
+  totalExpense?: number;
+  totalExpenses?: number;
+  netBalance?: number;
+  netSavings?: number;
+  savingsRate?: number;
+  topCategory?: string | null;
+  categoryBreakdown?: Record<string, number> | null;
 }
 
 export interface ReportRecord {

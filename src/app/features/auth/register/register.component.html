@@ -64,11 +64,17 @@
           </select>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading">
+        <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading || googleLoading">
           <span *ngIf="loading" class="spinner" style="width:18px;height:18px;"></span>
           {{ loading ? 'Creating account...' : 'Create account' }}
         </button>
       </form>
+
+      <div class="auth-divider"><span>or</span></div>
+
+      <div #googleButton class="google-button-wrap"></div>
+      <div class="google-loading text-sm text-muted" *ngIf="googleLoading">Signing in with Google...</div>
+      <div class="google-error form-error" *ngIf="googleInitError">{{ googleInitError }}</div>
 
       <p class="auth-switch">
         Already have an account?

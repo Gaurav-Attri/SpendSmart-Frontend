@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { MonthlySummary, ReportRecord, GenerateReportDto } from '../models/report.model';
+import {
+  MonthlySummary,
+  MonthlySummaryResponse,
+  ReportRecord,
+  GenerateReportDto,
+} from '../models/report.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReportService {
@@ -10,7 +15,18 @@ export class ReportService {
   constructor(private http: HttpClient) {}
 
   getMonthlySummary(userId: number, month: number, year: number): Observable<MonthlySummary> {
-    return this.http.get<MonthlySummary>(`${this.base}/monthly/${userId}/${month}/${year}`);
+    return this.http
+      .get<MonthlySummaryResponse>(`${this.base}/monthly/${userId}/${month}/${year}`)
+      .pipe(
+        map(summary => ({
+          totalIncome: summary.totalIncome ?? 0,
+          totalExpenses: summary.totalExpenses ?? summary.totalExpense ?? 0,
+          netSavings: summary.netSavings ?? summary.netBalance ?? 0,
+          savingsRate: summary.savingsRate ?? 0,
+          topCategory: summary.topCategory ?? null,
+          categoryBreakdown: summary.categoryBreakdown ?? null,
+        })),
+      );
   }
 
   getCategoryBreakdown(userId: number, start: string, end: string): Observable<any[]> {

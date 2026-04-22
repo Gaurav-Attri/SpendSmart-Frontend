@@ -55,9 +55,10 @@ export class ProfileComponent implements OnInit {
   savePassword(): void {
     if (this.passwordForm.invalid) return;
     this.savingPwd = true; this.successMsg = ''; this.errorMsg = '';
-    this.auth.changePassword(this.user.userId, this.passwordForm.value).subscribe({
+    const { currentPassword, newPassword } = this.passwordForm.value;
+    this.auth.changePassword(this.user.userId, { oldPassword: currentPassword, newPassword }).subscribe({
       next: () => { this.savingPwd = false; this.successMsg = 'Password changed!'; this.passwordForm.reset(); },
-      error: err => { this.savingPwd = false; this.errorMsg = err.error?.error || 'Failed'; }
+      error: err => { this.savingPwd = false; this.errorMsg = err.error?.error || err.error?.detail || err.error?.title || 'Failed'; }
     });
   }
 

@@ -83,6 +83,37 @@
   a { color: var(--primary); text-decoration: none; font-weight: 500; &:hover { text-decoration: underline; } }
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+}
+
+.google-button-wrap {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.google-loading,
+.google-error {
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .auth-left { display: none; }
   .auth-right { width: 100%; }

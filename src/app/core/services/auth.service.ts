@@ -1,14 +1,24 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, shareReplay, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginDto, RegisterDto, User, ChangePasswordDto, UpdateProfileDto } from '../models/user.model';
+import {
+  AuthResponse,
+  LoginDto,
+  RegisterDto,
+  User,
+  ChangePasswordDto,
+  UpdateProfileDto,
+  GoogleAuthUrlResponse,
+  GoogleLoginDto,
+} from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly base = environment.apis.auth;
   private currentUserSubject = new BehaviorSubject<User | null>(this.loadUser());
+  private googleAuthUrl$?: Observable<string>;
   currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient, private router: Router) {}
@@ -43,6 +53,37 @@ export class AuthService {
   register(dto: RegisterDto): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.base}/api/auth/register`, dto).pipe(
       tap(res => this.saveSession(res))
+    );
+  }
+
+  loginWithGoogle(dto: GoogleLoginDto): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.base}/api/auth/google-token`, dto).pipe(
+      tap(res => this.saveSession(res))
+    );
+  }
+
+  getGoogleAuthUrl(): Observable<string> {
+    if (!this.googleAuthUrl$) {
+      this.googleAuthUrl$ = this.http
+        .get<GoogleAuthUrlResponse | string>(`${this.base}/api/auth/google-url`)
+        .pipe(
+          map(response => typeof response === 'string' ? response : response?.url ?? ''),
+          shareReplay(1)
+        );
+    }
+
+    return this.googleAuthUrl$;
+  }
+
+  getGoogleClientId(): Observable<string> {
+    return this.getGoogleAuthUrl().pipe(
+      map(url => {
+        try {
+          return new URL(url).searchParams.get('client_id') ?? '';
+        } catch {
+          return '';
+        }
+      })
     );
   }
 
